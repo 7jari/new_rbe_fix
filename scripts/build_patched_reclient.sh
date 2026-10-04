@@ -46,7 +46,11 @@ fi
 mkdir -p "${RECLIENT_DIR}/internal/pkg/version"
 cp "${RECLIENT_DIR}/go.mod" "${RECLIENT_DIR}/internal/pkg/version/go.mod.txt"
 
-BASE_VERSION="$(cat "${LIVE_DIR}/version.txt")"
+if [[ -f "${LIVE_DIR}/version.txt" ]]; then
+  BASE_VERSION="$(cat "${LIVE_DIR}/version.txt")"
+else
+  BASE_VERSION="$(readlink "${LIVE_DIR}")"
+fi
 printf '%s' "${BASE_VERSION}-buildbuddyfix" > "${RECLIENT_DIR}/internal/pkg/version/version.txt"
 
 CLANG_JSON="$(find "${RECLIENT_DIR}/llvm" -maxdepth 1 -name 'clang-options-*.json' | head -n 1)"
