@@ -16,7 +16,15 @@ else
   RECLIENT_DIR="${AOSP_ROOT}/.tmp/reclient-buildbuddyfix-src"
 fi
 
-GO_BIN="${AOSP_ROOT}/prebuilts/go/linux-x86/bin/go"
+mkdir -p "$(dirname "${RECLIENT_DIR}")"
+
+wget -q --no-cookies --header "Cookie: gi=0" -O "${AOSP_ROOT}/.tmp/golang.tar.gz" 'https://android.googlesource.com/platform/prebuilts/go/linux-x86/+archive/refs/tags/android-17.0.0_r1.tar.gz'
+mkdir -p "${AOSP_ROOT}/.tmp/golang"
+tar -C "${AOSP_ROOT}/.tmp/golang" -xzf "${AOSP_ROOT}/.tmp/golang.tar.gz"
+rm "${AOSP_ROOT}/.tmp/golang.tar.gz"
+
+GO_BIN="${AOSP_ROOT}/.tmp/golang/bin/go"
+GOROOT="${AOSP_ROOT}/.tmp/golang"
 LIVE_DIR="${AOSP_ROOT}/prebuilts/remoteexecution-client/live"
 OUT_DIR="${AOSP_ROOT}/prebuilts/remoteexecution-client/buildbuddyfix"
 
@@ -29,8 +37,6 @@ if [[ ! -d "${LIVE_DIR}" ]]; then
   echo "missing bundled reclient dir: ${LIVE_DIR}" >&2
   exit 1
 fi
-
-mkdir -p "$(dirname "${RECLIENT_DIR}")"
 
 if [[ ! -d "${RECLIENT_DIR}/.git" ]]; then
   git clone --depth=1 https://github.com/bazelbuild/reclient "${RECLIENT_DIR}"
@@ -74,6 +80,7 @@ mkdir -p "${RECLIENT_DIR}/out"
   "${GO_BIN}" build -o ./out/reproxy ./cmd/reproxy
 )
 
+rm -rf "${GOROOT}"
 rm -rf "${OUT_DIR}"
 mkdir -p "${OUT_DIR}"
 cp -a "${LIVE_DIR}/." "${OUT_DIR}/"
